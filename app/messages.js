@@ -67,4 +67,8 @@ ipcMain.on('toMain', (event, arg) => {
       }
     })
   }
+  // copy files
+  if (arg && arg.req && arg.req === 'create') {
+    console.log(arg)
+  }
 })

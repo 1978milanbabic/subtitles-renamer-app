@@ -2,6 +2,7 @@
   "name": "electron-test",
   "version": "0.1.1",
   "description": "Subtitle Renamer",
+  "targets": {"main": false},
   "main": "main.js",
   "keywords": [
     "electron"
@@ -39,5 +40,11 @@
     "electron-devtools-installer": "^3.2.0",
     "parcel": "^2.0.1",
     "wait-on": "^6.0.0"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

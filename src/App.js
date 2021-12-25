@@ -174,7 +174,7 @@ function App() {
       }
     }, 1500)
   }
-  // *******************************
+
   // changing order of subtitles
   const handleReorderTitle = (value, nmb) => {
     // display typing
@@ -209,6 +209,18 @@ function App() {
         setSubs(asc)
       }
     }, 1500)
+  }
+
+  // send request to copy files
+  const handleReqCopy = () => {
+    if (((videos && videos.length > 0) || (subs && subs.length > 0)) && outputFolder && outputFolder !== '') {
+      window.api.send('toMain', {
+        req: 'create',
+        videos,
+        subs,
+        outputFolder
+      })
+    }
   }
 
   return (
@@ -395,6 +407,7 @@ function App() {
             style={{marginLeft: '40%'}}
             primary
             size='huge'
+            onClick={handleReqCopy}
           >
             Execute
           </Button>
