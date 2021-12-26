@@ -295,7 +295,7 @@ function App() {
               {videos && videos.map(video => (
                 <Table.Row key={video.nmb} className='fixed-height'>
                   <Table.Cell>
-                    <Popup
+                    {/* <Popup
                       on='click'
                       pinned
                       position='top left'
@@ -323,7 +323,10 @@ function App() {
                           Remove
                         </Button>
                       </Popup.Content>
-                    </Popup>
+                    </Popup> */}
+                    <Label color='blue' style={{cursor: 'pointer'}}>
+                      {video.nmb}
+                    </Label>
                   </Table.Cell>
                   <Table.Cell>
                     {video.sourceName}
