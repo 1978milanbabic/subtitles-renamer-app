@@ -1,5 +1,5 @@
 {
-  "name": "electron-test",
+  "name": "subtitle-renamer",
   "version": "0.1.1",
   "description": "Subtitle Renamer",
   "targets": {
@@ -9,24 +9,22 @@
   "keywords": [
     "electron"
   ],
-  "license": "ISC",
   "author": {
     "name": "Milan Babic",
     "email": "1978milan.babic@gmail.com",
     "url": "https://github.com/1978milanbabic/subtitles-renamer-app"
   },
   "homepage": "https://github.com/1978milanbabic/subtitles-renamer-app",
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://www.opensource.org/licenses/mit-license.php"
-  }],
+  "license": "MIT",
   "scripts": {
     "dev": "concurrently -k \"BROWSER=none npm start\" \"npm:electron\"",
     "electron": "wait-on tcp:1234 && electron-forge start",
     "start": "parcel public/index.html",
     "react-build": "parcel build public/index.html",
     "build": "npm run clean-build && npm run react-build && electron-builder",
-    "clean-build": "rm -rf build/ .parcel-cache dist/"
+    "clean-build": "rm -rf build/ .parcel-cache dist/ out/",
+    "make": "npm run clean-build && npm run react-build && electron-forge make",
+    "package": "npm run clean-build && npm run react-build && electron-forge package"
   },
   "dependencies": {
     "electron-is-dev": "^2.0.0",
@@ -73,6 +71,33 @@
       "target": "deb",
       "icon": "public/logo512.png",
       "category": "Development"
+    }
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "my_app"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
     }
   }
 }
