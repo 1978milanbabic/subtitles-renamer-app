@@ -16,6 +16,8 @@ import {
   Icon,
   Modal,
   Header,
+  Dimmer,
+  Loader
 } from 'semantic-ui-react'
 
 let vidInputTimeout, titleInputTimeout
@@ -40,6 +42,10 @@ function App() {
 
   const [noOutPutFolderError, setNoOutputFolderError] = useState(false)
   const [noSeasonError, setNoSeasonError] = useState(false)
+
+  const [showLoader, setShowLoader] = useState(false)
+  const [copySuccessModal, setCopySuccessModal] = useState(false)
+  const [copyErrorModal, setCopyErrorModal] = useState(false)
 
   // buttons
   const handleChooseFiles = e => {
@@ -95,7 +101,7 @@ function App() {
 
   // receiving messages from BE
   useEffect(() => {
-    window.api.receive('fromMain', data => {
+    let messages = window.api.receive('fromMain', data => {
       if (data) {
         // videos added
         if (data.videoFiles && data.videoFiles.length > 0) {
@@ -131,8 +137,37 @@ function App() {
         if (data.copyPath) {
           setOutputFolder(data.copyPath)
         }
+        // receive copy messages
+        if (data && data.copyVideo) {
+          let message = data.copyVideo
+          // report error
+          if (message === 'error') {
+            // hide dimmer
+            setShowLoader(false)
+            // show error message
+            setCopyErrorModal('Movies')
+          }
+        }
+        if (data && data.copyTitles) {
+          let message = data.copyTitles
+          console.log('titles log: ', message)
+          if (message === 'all files copied') {
+            // hide dimmer
+            setShowLoader(false)
+            // show success message
+            setCopySuccessModal(true)
+          }
+          // report error
+          if (message === 'error') {
+            // hide dimmer
+            setShowLoader(false)
+            // show error message
+            setCopyErrorModal('Subtitles')
+          }
+        }
       }
     })
+    return () => messages = null
   }, [season])
 
   // changing order of videos
@@ -227,15 +262,31 @@ function App() {
         setNoSeasonError(true)
       }
     }
+
     // send
     if (((videos && videos.length > 0) || (subs && subs.length > 0)) && outputFolder && outputFolder !== '') {
-      window.api.send('toMain', {
-        req: 'create',
-        videos,
-        subs,
-        outputFolder
-      })
+      // show dimmer
+      setShowLoader(true)
+      // prevent race
+      setTimeout(() => {
+        window.api.send('toMain', {
+          req: 'create',
+          videos,
+          subs,
+          outputFolder
+        })
+      }, 400)
     }
+  }
+
+  // copy success modal handler
+  const handleCloseSuccess = () => {
+    setCopySuccessModal(false)
+    // reset data
+    setVideos([])
+    setSubs([])
+    setSeason('')
+    setOutputFolder('')
   }
 
   return (
@@ -480,6 +531,45 @@ function App() {
         </Modal.Content>
         <Modal.Actions>
           <Button color='green' inverted onClick={() => setNoSeasonError(false)}>
+            <Icon name='checkmark' /> OK
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
+      {/* copying files loader */}
+      <Dimmer active={showLoader}>
+        <Loader />
+      </Dimmer>
+
+      {/* error copying - from BE */}
+      <Modal
+        size='tiny'
+        open={!!copyErrorModal}
+        onClose={() => setCopyErrorModal(false)}
+      >
+        <Header>Error!</Header>
+        <Modal.Content>
+          <p>Error ocured while copying {copyErrorModal || ''} files!</p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' inverted onClick={() => setCopyErrorModal(false)}>
+            <Icon name='checkmark' /> OK
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
+      {/* copy success */}
+      <Modal
+        size='tiny'
+        open={copySuccessModal}
+        onClose={handleCloseSuccess}
+      >
+        <Header>Success!</Header>
+        <Modal.Content>
+          <p>All files successfully copied!</p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' inverted onClick={handleCloseSuccess}>
             <Icon name='checkmark' /> OK
           </Button>
         </Modal.Actions>

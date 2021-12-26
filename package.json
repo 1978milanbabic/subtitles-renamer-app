@@ -1,6 +1,6 @@
 {
   "name": "subtitles_renamer",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "Subtitle Renamer",
   "targets": {
     "main": false

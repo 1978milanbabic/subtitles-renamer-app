@@ -24,7 +24,7 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      preload: __dirname + '/src/preload.js'
+      preload: __dirname + '/app/preload.js'
     },
     autoHideMenuBar: true,
     title: 'Subtitle Renamer'

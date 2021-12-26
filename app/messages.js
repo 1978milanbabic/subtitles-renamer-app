@@ -1,6 +1,7 @@
 const { ipcMain, dialog } = require('electron')
 const path = require('path')
 const _ = require('lodash')
+const fs = require('fs-extra')
 
 // defining files and paths
 let videoFiles, subtitleFiles, copyPath
@@ -69,6 +70,69 @@ ipcMain.on('toMain', (event, arg) => {
   }
   // copy files
   if (arg && arg.req && arg.req === 'create') {
-    console.log(arg)
+    let { outputFolder, subs, videos } = arg
+    // copy videos
+    const copyVideoFile = vid => {
+      let { sourcePath, newName } = vid
+      // do copy
+      try {
+        fs.copySync(sourcePath, path.join(outputFolder, newName))
+        // send success message
+        console.log('copied: ', newName)
+        // success
+        return true
+      } catch (err) {
+        console.error(err)
+        event.reply('fromMain', {copyVideo: 'error'})
+        return false
+      }
+    }
+    // copy titles
+    const copyTitle = sub => {
+      let { sourcePath, newName } = sub
+      // do copy
+      try {
+        fs.copySync(sourcePath, path.join(outputFolder, newName))
+        // send success message
+        console.log('copied: ', newName)
+        // success
+        return true
+      } catch (err) {
+        console.error(err)
+        event.reply('fromMain', {copyTitles: 'error'})
+        return false
+      }
+    }
+    // execute copy
+    let vidNmb = 0
+    let subNmb = 0
+
+    const exeCopySubs = () => {
+      let doCopy = copyTitle(subs[subNmb])
+      if (doCopy && (subNmb + 1) < subs.length) {
+        subNmb++
+        exeCopySubs()
+      } else {
+        // end
+        console.log('all copied!')
+        event.reply('fromMain', {copyTitles: 'all files copied'})
+      }
+    }
+
+    let exeCopySync = () => {
+      let doCopy = copyVideoFile(videos[vidNmb])
+      if (doCopy && (vidNmb + 1) < videos.length) {
+        vidNmb++
+        exeCopySync()
+      } else {
+        // end
+        console.log('all videos copied!')
+        event.reply('fromMain', {copyVideo: 'all videos copied'})
+        // copy sync titles
+        exeCopySubs(0)
+      }
+    }
+    // do copy all
+    exeCopySync(0)
   }
 })

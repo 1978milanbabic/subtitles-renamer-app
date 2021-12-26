@@ -36,3 +36,7 @@ html, body {
   line-height: 1;
 }
 
+.App .dimmer {
+  position: fixed;
+  z-index: 999999;
+}
