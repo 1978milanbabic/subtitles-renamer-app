@@ -14,6 +14,8 @@ import {
   Grid,
   Label,
   Popup,
+  Modal,
+  Header,
 } from 'semantic-ui-react'
 
 let vidInputTimeout, titleInputTimeout
@@ -26,6 +28,15 @@ function App() {
   const [outputFolder, setOutputFolder] = useState('')
   const [curVideoNmb, setCurVideoNmb] = useState()
   const [curtitleNmb, setCurtitleNmb] = useState()
+
+  const [videoModal, setVideoModal] = useState({
+    open: false,
+    fileNmb: 0
+  })
+  const [titleModal, setTitleModal] = useState({
+    open: false,
+    fileNmb: 0
+  })
 
   // buttons
   const handleChooseFiles = e => {
@@ -49,10 +60,18 @@ function App() {
   const handleRemoveSingleVideo = nmb => {
     let reduced = videos.filter(vid => vid.nmb !== nmb)
     setVideos(reduced)
+    setVideoModal({
+      open: false,
+      fileNmb: 0
+    })
   }
   const handleRemoveSingleTitle = nmb => {
     let reduced = subs.filter(sub => sub.nmb !== nmb)
     setSubs(reduced)
+    setTitleModal({
+      open: false,
+      fileNmb: 0
+    })
   }
 
   // receiving messages from BE
@@ -171,6 +190,10 @@ function App() {
         // set
         setCurVideoNmb()
         setVideos(asc)
+        setVideoModal({
+          open: false,
+          fileNmb: 0
+        })
       }
     }, 1500)
   }
@@ -207,6 +230,10 @@ function App() {
         // set
         setCurtitleNmb()
         setSubs(asc)
+        setTitleModal({
+          open: false,
+          fileNmb: 0
+        })
       }
     }, 1500)
   }
@@ -295,36 +322,16 @@ function App() {
               {videos && videos.map(video => (
                 <Table.Row key={video.nmb} className='fixed-height'>
                   <Table.Cell>
-                    {/* <Popup
-                      on='click'
-                      pinned
-                      position='top left'
-                      trigger={
-                        <Label color='blue'>
-                          {video.nmb}
-                        </Label>
-                      }
+                    <Label
+                      color='blue'
+                      style={{cursor: 'pointer'}}
+                      onClick={() => {
+                        setVideoModal({
+                          open: true,
+                          fileNmb: video.nmb
+                        })
+                      }}
                     >
-                      <Popup.Header>
-                        Reorder or Remove Video
-                      </Popup.Header>
-                      <Popup.Content>
-                        <Input
-                          value={curVideoNmb || video.nmb}
-                          onChange={(e, { value }) => handleReorderVideo(value, video.nmb)}
-                          autoFocus
-                          onFocus={e => {e.target.selectionStart = 0, e.target.selectionEnd = 2}}
-                        />
-                        <br /><br />
-                        <Button
-                          color='red'
-                          onClick={() => handleRemoveSingleVideo(video.nmb)}
-                        >
-                          Remove
-                        </Button>
-                      </Popup.Content>
-                    </Popup> */}
-                    <Label color='blue' style={{cursor: 'pointer'}}>
                       {video.nmb}
                     </Label>
                   </Table.Cell>
@@ -359,35 +366,18 @@ function App() {
               {subs && subs.map((title, i) => (
                 <Table.Row key={`title-${title.nmb}`} className='fixed-height'>
                   <Table.Cell>
-                    <Popup
-                      on='click'
-                      pinned
-                      position='top left'
-                      trigger={
-                        <Label color='blue'>
-                          {title.nmb}
-                        </Label>
-                      }
+                    <Label
+                      color='blue'
+                      style={{cursor: 'pointer'}}
+                      onClick={() => {
+                        setTitleModal({
+                          open: true,
+                          fileNmb: title.nmb
+                        })
+                      }}
                     >
-                      <Popup.Header>
-                        Reorder or Remove title
-                      </Popup.Header>
-                      <Popup.Content>
-                        <Input
-                          value={curtitleNmb || title.nmb}
-                          onChange={(e, { value }) => handleReorderTitle(value, title.nmb)}
-                          autoFocus
-                          onFocus={e => {e.target.selectionStart = 0, e.target.selectionEnd = 2}}
-                        />
-                        <br /><br />
-                        <Button
-                          color='red'
-                          onClick={() => handleRemoveSingleTitle(title.nmb)}
-                        >
-                          Remove
-                        </Button>
-                      </Popup.Content>
-                    </Popup>
+                      {title.nmb}
+                    </Label>
                   </Table.Cell>
                   <Table.Cell>
                     {title.sourceName}
@@ -418,6 +408,60 @@ function App() {
           <br/>
         </>
       )}
+
+      {/* edit video modal */}
+      <Modal
+        basic
+        open={videoModal && videoModal.open}
+        onClose={() => setVideoModal({
+          open: false,
+          fileNmb: 0
+        })}
+        size='tiny'
+      >
+        <Header>Edit or remove Video</Header>
+        <Modal.Content>
+          <Input
+            value={curVideoNmb || videoModal.fileNmb}
+            onChange={(e, { value }) => handleReorderVideo(value, videoModal.fileNmb)}
+            autoFocus
+            onFocus={e => {e.target.selectionStart = 0, e.target.selectionEnd = 2}}
+          />&emsp;&emsp;
+          <Button
+            color='red'
+            onClick={() => handleRemoveSingleVideo(videoModal.fileNmb)}
+          >
+            Remove
+          </Button>
+        </Modal.Content>
+      </Modal>
+
+      {/* edit title modal */}
+      <Modal
+        basic
+        open={titleModal && titleModal.open}
+        onClose={() => setTitleModal({
+          open: false,
+          fileNmb: 0
+        })}
+        size='tiny'
+      >
+        <Header>Edit or remove Title</Header>
+        <Modal.Content>
+          <Input
+            value={curtitleNmb || titleModal.fileNmb}
+            onChange={(e, { value }) => handleReorderTitle(value, titleModal.fileNmb)}
+            autoFocus
+            onFocus={e => {e.target.selectionStart = 0, e.target.selectionEnd = 2}}
+          />&emsp;&emsp;
+          <Button
+            color='red'
+            onClick={() => handleRemoveSingleTitle(titleModal.fileNmb)}
+          >
+            Remove
+          </Button>
+        </Modal.Content>
+      </Modal>
     </Container>
   )
 }
