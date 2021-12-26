@@ -13,7 +13,7 @@ import {
   Input,
   Grid,
   Label,
-  Popup,
+  Icon,
   Modal,
   Header,
 } from 'semantic-ui-react'
@@ -38,6 +38,9 @@ function App() {
     fileNmb: 0
   })
 
+  const [noOutPutFolderError, setNoOutputFolderError] = useState(false)
+  const [noSeasonError, setNoSeasonError] = useState(false)
+
   // buttons
   const handleChooseFiles = e => {
     window.api.send('toMain', 'prompt subtitles')
@@ -56,6 +59,22 @@ function App() {
   }
   const handleChangeSeason = (e, { value }) => {
     setSeason(value && value !== '' ? value : '')
+    // change videos newNames
+    if (videos && videos.length > 0) {
+      let editVidNewName = videos.map(vid => {
+        vid.newName = `s${value}e${vid.nmb < 10 ? '0' + vid.nmb : vid.nmb}${vid.ext}`
+        return vid
+      })
+      setVideos(editVidNewName)
+    }
+    // change subtitles new names
+    if (subs && subs.length > 0) {
+      let editSubNewName = subs.map(sub => {
+        sub.newName = `s${value}e${sub.nmb < 10 ? '0' + sub.nmb : sub.nmb}${sub.ext}`
+        return sub
+      })
+      setSubs(editSubNewName)
+    }
   }
   const handleRemoveSingleVideo = nmb => {
     let reduced = videos.filter(vid => vid.nmb !== nmb)
@@ -88,8 +107,7 @@ function App() {
               sourceName: vid.sourceName,
               sourcePath: vid.sourcePath,
               newName: (season && season !== '') ? `s${season}e${(i + 1) < 10 ? '0' + (i + 1) : (i + 1)}${vid.ext}` : '',
-              ext: vid.ext,
-              reorderDialog: false
+              ext: vid.ext
             }
           })
           setVideos(vidObj)
@@ -104,8 +122,7 @@ function App() {
               sourceName: sub.sourceName,
               sourcePath: sub.sourcePath,
               newName: (season && season !== '') ? `s${season}e${(i + 1) < 10 ? '0' + (i + 1) : (i + 1)}${sub.ext}` : '',
-              ext: sub.ext,
-              reorderDialog: false
+              ext: sub.ext
             }
           })
           setSubs(subObj)
@@ -116,46 +133,6 @@ function App() {
         }
       }
     })
-  }, [])
-
-  // changing season
-  useEffect(() => {
-    if (season) {
-      // change videos newNames
-      if (videos) {
-        let editVidNewName = videos.map(vid => {
-          vid.newName = `s${season}e${vid.nmb < 10 ? '0' + vid.nmb : vid.nmb}${vid.ext}`
-          return vid
-        })
-        setVideos(editVidNewName)
-      }
-      // change subtitles new names
-      if (subs) {
-        let editSubNewName = subs.map(sub => {
-          sub.newName = `s${season}e${sub.nmb < 10 ? '0' + sub.nmb : sub.nmb}${sub.ext}`
-          return sub
-        })
-        setSubs(editSubNewName)
-      }
-    } else {
-      // delete season
-      // change videos newNames
-      if (videos) {
-        let editVidNewName = videos.map(vid => {
-          vid.newName = ''
-          return vid
-        })
-        setVideos(editVidNewName)
-      }
-      // change subtitles new names
-      if (subs) {
-        let editSubNewName = subs.map(sub => {
-          sub.newName = ''
-          return sub
-        })
-        setSubs(editSubNewName)
-      }
-    }
   }, [season])
 
   // changing order of videos
@@ -240,6 +217,17 @@ function App() {
 
   // send request to copy files
   const handleReqCopy = () => {
+    // errors
+    if  (!outputFolder || outputFolder === '') {
+      // show no folder error
+      setNoOutputFolderError(true)
+    } else {
+      if (!season || season === '') {
+        // show no seson set error
+        setNoSeasonError(true)
+      }
+    }
+    // send
     if (((videos && videos.length > 0) || (subs && subs.length > 0)) && outputFolder && outputFolder !== '') {
       window.api.send('toMain', {
         req: 'create',
@@ -462,6 +450,41 @@ function App() {
           </Button>
         </Modal.Content>
       </Modal>
+
+      {/* output folder not defined error */}
+      <Modal
+        size='tiny'
+        open={noOutPutFolderError}
+        onClose={() => setNoOutputFolderError(false)}
+      >
+        <Header>Can Not Execute!</Header>
+        <Modal.Content>
+          <p>Output Folder Not Selected!</p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' inverted onClick={() => setNoOutputFolderError(false)}>
+            <Icon name='checkmark' /> OK
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
+      {/* season not defined error */}
+      <Modal
+        size='tiny'
+        open={noSeasonError}
+        onClose={() => setNoSeasonError(false)}
+      >
+        <Header>Can Not Execute!</Header>
+        <Modal.Content>
+          <p>Season Not Defined!</p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' inverted onClick={() => setNoSeasonError(false)}>
+            <Icon name='checkmark' /> OK
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
     </Container>
   )
 }
