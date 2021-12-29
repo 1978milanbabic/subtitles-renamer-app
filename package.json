@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently -k \"BROWSER=none npm start\" \"npm:electron\"",
+    "dev": "concurrently -k \"cross-env BROWSER=none npm start\" \"npm:electron\"",
     "electron": "wait-on tcp:1234 && electron-forge start",
     "start": "parcel public/index.html",
     "react-build": "parcel build public/index.html --public-url ./",
