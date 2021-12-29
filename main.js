@@ -20,8 +20,9 @@ if (require('electron-squirrel-startup')) {
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1000,
+    width: 1200,
     height: 600,
+    show: false,
     webPreferences: {
       nodeIntegration: true,
       preload: __dirname + '/app/preload.js'
@@ -47,6 +48,10 @@ function createWindow() {
 
   // messages
   require('./app/messages')
+
+  // open maximized
+  win.maximize()
+  win.show()
 
 }
 

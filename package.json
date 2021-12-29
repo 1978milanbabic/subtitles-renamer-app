@@ -1,6 +1,6 @@
 {
   "name": "subtitles_renamer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Subtitle Renamer",
   "targets": {
     "main": false
@@ -26,6 +26,7 @@
     "package": "npm run clean-build && npm run react-build && electron-forge package"
   },
   "dependencies": {
+    "cross-env": "^7.0.3",
     "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "fs-extra": "^10.0.0",
