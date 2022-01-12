@@ -21,7 +21,7 @@
     "electron": "wait-on tcp:1234 && electron-forge start",
     "start": "parcel public/index.html",
     "react-build": "parcel build public/index.html --public-url ./",
-    "clean-build": "rm -rf build/ .parcel-cache dist/ out/",
+    "clean-build": "rimraf build/ .parcel-cache dist/ out/",
     "make": "npm run clean-build && npm run react-build && electron-forge make",
     "package": "npm run clean-build && npm run react-build && electron-forge package"
   },
@@ -33,6 +33,7 @@
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "rimraf": "^3.0.2",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.4"
   },
