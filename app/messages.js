@@ -72,34 +72,58 @@ ipcMain.on('toMain', (event, arg) => {
   if (arg && arg.req && arg.req === 'create') {
     let { outputFolder, subs, videos } = arg
     // copy videos
-    const copyVideoFile = vid => {
+    const copyVideoFile = async vid => {
       let { sourcePath, newName } = vid
+      // send start message
+      event.reply('fromMain', {
+        copyVideo: newName,
+        start: true
+      })
       // do copy
       try {
-        fs.copySync(sourcePath, path.join(outputFolder, newName))
+        await fs.copy(sourcePath, path.join(outputFolder, newName))
         // send success message
         console.log('copied: ', newName)
         // success
+        event.reply('fromMain', {
+          copyVideo: newName,
+          success: true
+        })
         return true
       } catch (err) {
         console.error(err)
-        event.reply('fromMain', {copyVideo: 'error'})
+        event.reply('fromMain', {
+          copyVideo: newName,
+          error: true
+        })
         return false
       }
     }
     // copy titles
-    const copyTitle = sub => {
+    const copyTitle = async sub => {
       let { sourcePath, newName } = sub
+      // send start message
+      event.reply('fromMain', {
+        copyTitle: newName,
+        start: true
+      })
       // do copy
       try {
-        fs.copySync(sourcePath, path.join(outputFolder, newName))
+        await fs.copy(sourcePath, path.join(outputFolder, newName))
         // send success message
         console.log('copied: ', newName)
         // success
+        event.reply('fromMain', {
+          copyTitle: newName,
+          success: true
+        })
         return true
       } catch (err) {
         console.error(err)
-        event.reply('fromMain', {copyTitles: 'error'})
+        event.reply('fromMain', {
+          copyTitle: newName,
+          error: true
+        })
         return false
       }
     }
@@ -107,8 +131,8 @@ ipcMain.on('toMain', (event, arg) => {
     let vidNmb = 0
     let subNmb = 0
 
-    const exeCopySubs = () => {
-      let doCopy = copyTitle(subs[subNmb])
+    const exeCopySubs = async () => {
+      let doCopy = await copyTitle(subs[subNmb])
       if (doCopy && (subNmb + 1) < subs.length) {
         subNmb++
         exeCopySubs()
@@ -119,11 +143,11 @@ ipcMain.on('toMain', (event, arg) => {
       }
     }
 
-    let exeCopySync = () => {
-      let doCopy = copyVideoFile(videos[vidNmb])
+    let executeCopy = async () => {
+      let doCopy = await copyVideoFile(videos[vidNmb])
       if (doCopy && (vidNmb + 1) < videos.length) {
         vidNmb++
-        exeCopySync()
+        executeCopy()
       } else {
         // end
         console.log('all videos copied!')
@@ -133,6 +157,6 @@ ipcMain.on('toMain', (event, arg) => {
       }
     }
     // do copy all
-    exeCopySync(0)
+    executeCopy(0)
   }
 })

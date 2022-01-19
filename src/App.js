@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import _ from 'lodash'
 
 // styles
@@ -46,6 +46,16 @@ function App() {
   const [showLoader, setShowLoader] = useState(false)
   const [copySuccessModal, setCopySuccessModal] = useState(false)
   const [copyErrorModal, setCopyErrorModal] = useState(false)
+
+  // progress bar
+  const [videoProgressFile, setVideoProgressFile] = useState('')
+  const [titleProgressFile, setTitleProgressFile] = useState('')
+  const [copiedVideos, setCopiedVideos] = useState(0)
+  const [copiedTitles, setCopiedTitles] = useState(0)
+  const videoBar = useRef()
+  const titleBar = useRef()
+  const videosDone = useRef()
+  const titlesDone = useRef()
 
   // buttons
   const handleChooseFiles = e => {
@@ -139,26 +149,62 @@ function App() {
         }
         // receive copy messages
         if (data && data.copyVideo) {
-          let message = data.copyVideo
-          // report error
-          if (message === 'error') {
+          // start file copying
+          if (data.start) {
+            setVideoProgressFile(data.copyVideo + ' ...')
+          }
+          // end file copying
+          if (data.success) {
+            let updatedCopies = copiedVideos + 1
+            // set progress
+            let progress = parseInt((updatedCopies / videos.length) * 100)
+            videoBar.current.style.width = progress + '%'
+            if ((updatedCopies / videos.length) === 1) {
+              // set progress file name
+              setVideoProgressFile('Done!')
+              videosDone.current.style.visibility = 'visible'
+            } else {
+              setVideoProgressFile('...')
+            }
+
+            setCopiedVideos(updatedCopies)
+          }
+          // error copying
+          if (data.error) {
             // hide dimmer
             setShowLoader(false)
             // show error message
             setCopyErrorModal('Movies')
           }
         }
-        if (data && data.copyTitles) {
-          let message = data.copyTitles
-          console.log('titles log: ', message)
-          if (message === 'all files copied') {
-            // hide dimmer
-            setShowLoader(false)
-            // show success message
-            setCopySuccessModal(true)
+        if (data && data.copyTitle) {
+          // start file copying
+          if (data.start) {
+            setTitleProgressFile(data.copyTitle + ' ...')
           }
-          // report error
-          if (message === 'error') {
+          // end file copying
+          if (data.success) {
+            let updatedCopies = copiedTitles + 1
+            // set progress
+            let progress = parseInt((updatedCopies / subs.length) * 100)
+            titleBar.current.style.width = progress + '%'
+            if ((updatedCopies / subs.length) === 1) {
+              // set progress file name
+              setTitleProgressFile('Done!')
+              titlesDone.current.style.visibility = 'visible'
+              // show success message
+              setTimeout(() => {
+                setShowLoader(false)
+                setCopySuccessModal(true)
+              }, 3000)
+            } else {
+              setTitleProgressFile('...')
+            }
+
+            setCopiedTitles(updatedCopies)
+          }
+          // error copying
+          if (data.error) {
             // hide dimmer
             setShowLoader(false)
             // show error message
@@ -168,7 +214,7 @@ function App() {
       }
     })
     return () => messages = null
-  }, [season])
+  }, [season, copiedVideos, copiedTitles, videoProgressFile, titleProgressFile])
 
   // changing order of videos
   const handleReorderVideo = (value, nmb) => {
@@ -536,9 +582,46 @@ function App() {
         </Modal.Actions>
       </Modal>
 
-      {/* copying files loader */}
-      <Dimmer active={showLoader}>
-        <Loader />
+      {/* copying files loader active={showLoader} */}
+      <Dimmer active={showLoader} className='processing-loader'>
+        <div className='center-loader'>
+          <div className='files-load'>
+            <p>Video: {videoProgressFile}</p>
+            <div className='progress-table'>
+              <div className='right'>
+                <div className='bar'>
+                  <div className='video-bar'
+                    ref={videoBar}
+                  ></div>
+                </div>
+              </div>
+              <div className='video-done'>
+                <p
+                  ref={videosDone}
+                  style={{visibility: 'hidden'}}
+                >Done!</p>
+              </div>
+            </div>
+          </div>
+          <div className='files-load'>
+            <p>Title: {titleProgressFile}</p>
+            <div className='progress-table'>
+              <div className='right'>
+                <div className='bar'>
+                  <div className='title-bar'
+                    ref={titleBar}
+                  ></div>
+                </div>
+              </div>
+              <div className='title-done'>
+                <p
+                  ref={titlesDone}
+                  style={{visibility: 'hidden'}}
+                >Done!</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </Dimmer>
 
       {/* error copying - from BE */}

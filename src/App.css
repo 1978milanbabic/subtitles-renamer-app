@@ -36,7 +36,79 @@ html, body {
   line-height: 1;
 }
 
+/* processing files */
+
 .App .dimmer {
   position: fixed;
   z-index: 999999;
+}
+
+.App .processing-loader .content {
+  width: 100%;
+}
+
+.App .processing-loader .content .center-loader {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.App .processing-loader .content .files-load {
+  width: 100%;
+  text-align: left;
+  padding-bottom: 40px;
+}
+
+.App .processing-loader .content .files-load p {
+  text-align: center;
+}
+
+.App .processing-loader .content .files-load .progress-table {
+  width: 100%;
+  display: table;
+}
+
+.App .processing-loader .content .files-load .progress-table .left {
+  display: table-cell;
+  width: 80px;
+  vertical-align: bottom;
+}
+
+.App .processing-loader .content .files-load .progress-table .right {
+  display: table-cell;
+  vertical-align: bottom;
+}
+
+.App .processing-loader .content .files-load .progress-table .video-done,
+.App .processing-loader .content .files-load .progress-table .title-done {
+  display: table-cell;
+  vertical-align: bottom;
+  width: 50px;
+  color: #7afff2;
+  text-align: right;
+}
+
+.App .processing-loader .content .files-load .progress-table .right .bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.App .processing-loader .content .files-load .progress-table .right .video-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 10px;
+  transition: all 0.4s ease-in-out;
+  background-color: #7afff2;
+}
+
+.App .processing-loader .content .files-load .progress-table .right .title-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 10px;
+  transition: all 0.1s ease-in-out;
+  background-color: #7afff2;
 }
