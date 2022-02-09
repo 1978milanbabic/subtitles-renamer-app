@@ -15,13 +15,16 @@
       }
       #preload {
         width: 100%;
-        height: 100%;
+        height: 100vh;
         display: table;
       }
       #preload .pr-cell {
         text-align: center;
         display: table-cell;
         vertical-align: middle;
+      }
+      #preload .pr-cell h1 {
+        color: antiquewhite;
       }
     </style>
   </head>
@@ -30,7 +33,7 @@
     <div id="root">
       <div id="preload">
         <div class="pr-cell">
-          <p>Loading ...</p>
+          <h1>Loading ...</h1>
         </div>
       </div>
     </div>

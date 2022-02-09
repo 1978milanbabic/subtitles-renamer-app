@@ -22,6 +22,8 @@ import {
 
 let vidInputTimeout, titleInputTimeout
 
+let inv = 0
+
 function App() {
   // states
   const [videos, setVideos] = useState([])
@@ -49,9 +51,8 @@ function App() {
 
   // progress bar
   const [videoProgressFile, setVideoProgressFile] = useState('')
-  const [titleProgressFile, setTitleProgressFile] = useState('')
+  const [titleProgressFile, setTitleProgressFile] = useState('...')
   const [copiedVideos, setCopiedVideos] = useState(0)
-  const [copiedTitles, setCopiedTitles] = useState(0)
   const videoBar = useRef()
   const titleBar = useRef()
   const videosDone = useRef()
@@ -74,7 +75,7 @@ function App() {
     setOutputFolder('')
   }
   const handleChangeSeason = (e, { value }) => {
-    setSeason(value && value !== '' ? value : '')
+    setSeason(season => (value && value !== '' ? value : ''))
     // change videos newNames
     if (videos && videos.length > 0) {
       let editVidNewName = videos.map(vid => {
@@ -109,9 +110,12 @@ function App() {
     })
   }
 
+
   // receiving messages from BE
-  useEffect(() => {
-    let messages = window.api.receive('fromMain', data => {
+  const setMessagesListener = () => {
+    // set api
+    window.api.receive('fromMain', data => {
+      console.log('here ', inv)
       if (data) {
         // videos added
         if (data.videoFiles && data.videoFiles.length > 0) {
@@ -126,7 +130,7 @@ function App() {
               ext: vid.ext
             }
           })
-          setVideos(vidObj)
+          setVideos(videos => ([ ...vidObj ]))
         }
         // titles added
         if (data.subtitleFiles && data.subtitleFiles.length > 0) {
@@ -141,17 +145,17 @@ function App() {
               ext: sub.ext
             }
           })
-          setSubs(subObj)
+          setSubs(subs => ([ ...subObj ]))
         }
         // copy folder added
         if (data.copyPath) {
-          setOutputFolder(data.copyPath)
+          setOutputFolder(outputFolder => (data.copyPath))
         }
         // receive copy messages
         if (data && data.copyVideo) {
           // start file copying
           if (data.start) {
-            setVideoProgressFile(data.copyVideo + ' ...')
+            setVideoProgressFile(videoProgressFile => (data.copyVideo + ' ...'))
           }
           // end file copying
           if (data.success) {
@@ -161,60 +165,60 @@ function App() {
             videoBar.current.style.width = progress + '%'
             if ((updatedCopies / videos.length) === 1) {
               // set progress file name
-              setVideoProgressFile('Done!')
+              setVideoProgressFile(videoProgressFile => ('Done!'))
               videosDone.current.style.visibility = 'visible'
             } else {
-              setVideoProgressFile('...')
+              setVideoProgressFile(videoProgressFile => ('...'))
             }
 
-            setCopiedVideos(updatedCopies)
+            setCopiedVideos(copiedVideos => (updatedCopies))
           }
           // error copying
           if (data.error) {
             // hide dimmer
-            setShowLoader(false)
+            setShowLoader(showLoader => (false))
             // show error message
-            setCopyErrorModal('Movies')
+            setCopyErrorModal(copyErrorModal => ('Movies'))
           }
         }
-        if (data && data.copyTitle) {
+        if (data && data.copyTitles) {
           // start file copying
           if (data.start) {
-            setTitleProgressFile(data.copyTitle + ' ...')
+            setTitleProgressFile(titleProgressFile => (data.copyTitle + ' ...'))
           }
           // end file copying
           if (data.success) {
-            let updatedCopies = copiedTitles + 1
             // set progress
-            let progress = parseInt((updatedCopies / subs.length) * 100)
-            titleBar.current.style.width = progress + '%'
-            if ((updatedCopies / subs.length) === 1) {
-              // set progress file name
-              setTitleProgressFile('Done!')
-              titlesDone.current.style.visibility = 'visible'
-              // show success message
-              setTimeout(() => {
-                setShowLoader(false)
-                setCopySuccessModal(true)
-              }, 3000)
-            } else {
-              setTitleProgressFile('...')
-            }
-
-            setCopiedTitles(updatedCopies)
+            titleBar.current.style.width = '100%'
+            // set progress file name
+            setTitleProgressFile(titleProgressFile => ('Done!'))
+            // titlesDone.current.style.visibility = 'visible'
+            // show success message
+            setTimeout(() => {
+              setShowLoader(showLoader => (false))
+              setCopySuccessModal(copySuccessModal => (true))
+            }, 2000)
           }
           // error copying
           if (data.error) {
             // hide dimmer
-            setShowLoader(false)
+            setShowLoader(showLoader => (false))
             // show error message
-            setCopyErrorModal('Subtitles')
+            setCopyErrorModal(copyErrorModal => ('Subtitles'))
           }
         }
       }
     })
-    return () => messages = null
-  }, [season, copiedVideos, copiedTitles, videoProgressFile, titleProgressFile])
+  }
+
+  // init listeners
+  useEffect(() => {
+    inv++
+    // clear egzisting listeners
+    window.api.clear()
+    // set listeners
+    setMessagesListener()
+  }, [season, copiedVideos])
 
   // changing order of videos
   const handleReorderVideo = (value, nmb) => {
@@ -333,6 +337,14 @@ function App() {
     setSubs([])
     setSeason('')
     setOutputFolder('')
+    // reset progress
+    setVideoProgressFile('')
+    setTitleProgressFile('...')
+    setCopiedVideos(0)
+    videoBar.current.style.width = '1%'
+    titleBar.current.style.width = '1%'
+    videosDone.current.style.visibility = 'hidden'
+    titlesDone.current.style.visibility = 'hidden'
   }
 
   return (

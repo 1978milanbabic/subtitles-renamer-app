@@ -102,21 +102,11 @@ ipcMain.on('toMain', (event, arg) => {
     // copy titles
     const copyTitle = async sub => {
       let { sourcePath, newName } = sub
-      // send start message
-      event.reply('fromMain', {
-        copyTitle: newName,
-        start: true
-      })
       // do copy
       try {
         await fs.copy(sourcePath, path.join(outputFolder, newName))
         // send success message
         console.log('copied: ', newName)
-        // success
-        event.reply('fromMain', {
-          copyTitle: newName,
-          success: true
-        })
         return true
       } catch (err) {
         console.error(err)
@@ -139,7 +129,10 @@ ipcMain.on('toMain', (event, arg) => {
       } else {
         // end
         console.log('all copied!')
-        event.reply('fromMain', {copyTitles: 'all files copied'})
+        event.reply('fromMain', {
+          copyTitles: 'all files copied',
+          success: true
+        })
       }
     }
 
